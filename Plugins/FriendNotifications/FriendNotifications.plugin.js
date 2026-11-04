@@ -17,6 +17,10 @@ module.exports = (_ => {
 		
 	};
 
+	const fs = require("fs");
+	const path = require("path");
+	const logPath = path.join(BdApi.Plugins.folder, "FriendNotifications.log");
+
 	return !window.BDFDB_Global || (!window.BDFDB_Global.loaded && !window.BDFDB_Global.started) ? class {
 		constructor (meta) {for (let key in meta) this[key] = meta[key];}
 		getName () {return this.name;}
@@ -240,7 +244,7 @@ module.exports = (_ => {
 					},
 					amounts: {
 						toastTime:			{value: 5, 	min: 1,		description: "Amount of Seconds a Toast Notification stays on Screen: "},
-						checkInterval:			{value: 10, 	min: 5,		description: "Checks Users every X Seconds: "}
+						checkInterval:			{value: 10, 	min: 1,		description: "Checks Users every X Seconds: "}
 					}
 				};
 			
@@ -977,6 +981,19 @@ module.exports = (_ => {
 								BDFDB.ReactUtils.forceUpdate(timeLogList);
 							})
 						}),
+
+						BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Button, {
+  							color: BDFDB.LibraryComponents.Button.Colors.GREEN,
+							size: BDFDB.LibraryComponents.Button.Sizes.TINY,
+							look: BDFDB.LibraryComponents.Button.Looks.OUTLINE,
+							children: "Export CSV",
+							onClick: _ => {
+								const fs = BDFDB.LibraryRequires.fs;
+								fs.writeFileSync("timelog.csv", toCSV(timeLog), "utf8");
+								BDFDB.NotificationUtils.toast("Timelog exported to timelog.csv");
+							}
+						})
+						
 						BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SearchBar, {
 							autoFocus: true,
 							query: "",
