@@ -17,9 +17,29 @@ module.exports = (_ => {
 		
 	};
 
-	const fs = require("fs");
-	const path = require("path");
-	const logPath = path.join(BdApi.Plugins.folder, "FriendNotifications.log");
+	const fs = BDFDB.LibraryRequires.fs;
+	
+	function exportTXT(timeLog) {
+		fs.writeFileSync("timelog.txt", JSON.stringify(timeLog, null, 2), "utf8");
+		BDFDB.NotificationUtils.toast("Exported timelog.txt")
+	}
+
+	function toCSV(data) {
+		if (!data.length) return "";
+		const headers = Object.keys(data[0]);
+		const rows = data.map(entry =>
+			headers.map(h => JSON.stringify(entry[h] ?? "")).join(",")
+							 );
+		return headers.join(",") + "
+			" + rows.join("
+			");
+				}
+
+	function exportCSV(timeLog) {
+		fs.writeFileSync("timelog.csv", toCSV(timeLog), "utf8");
+		BDFDB.NotificationUtils.toast("Exported timelog.csv");
+	}
+	
 
 	return !window.BDFDB_Global || (!window.BDFDB_Global.loaded && !window.BDFDB_Global.started) ? class {
 		constructor (meta) {for (let key in meta) this[key] = meta[key];}
@@ -983,16 +1003,21 @@ module.exports = (_ => {
 						}),
 
 						BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Button, {
-  							color: BDFDB.LibraryComponents.Button.Colors.GREEN,
+							color: BDFDB.LibraryComponents.Button.Colors.GREEN,
+							size: BDFDB.LibraryComponents.Button.Sizes.TINY,
+							look: BDFDB.LibraryComponents.Button.Looks.OUTLINE,
+							children: "Export TXT",
+							onClick: _ => exportTXT(timeLog)
+						}),
+						
+						
+						BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.Button, {
+							color: BDFDB.LibraryComponents.Button.Colors.GREEN,
 							size: BDFDB.LibraryComponents.Button.Sizes.TINY,
 							look: BDFDB.LibraryComponents.Button.Looks.OUTLINE,
 							children: "Export CSV",
-							onClick: _ => {
-								const fs = BDFDB.LibraryRequires.fs;
-								fs.writeFileSync("timelog.csv", toCSV(timeLog), "utf8");
-								BDFDB.NotificationUtils.toast("Timelog exported to timelog.csv");
-							}
-						})
+							onClick: _ => exportCSV(timeLog)
+						}),
 						
 						BDFDB.ReactUtils.createElement(BDFDB.LibraryComponents.SearchBar, {
 							autoFocus: true,
